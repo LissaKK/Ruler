@@ -1,5 +1,26 @@
 import { defineConfig } from 'vite';
 import path from 'node:path';
+import fs from 'node:fs';
+
+function copyPopupHtmlPlugin() {
+  return {
+    name: 'copy-popup-html-plugin',
+    closeBundle() {
+      const popupSource = path.resolve(__dirname, 'src', 'popup', 'popup.html');
+      const popupTarget = path.resolve(__dirname, 'dist', 'popup.html');
+
+      if (!fs.existsSync(popupSource)) {
+        return;
+      }
+
+      const html = fs.readFileSync(popupSource, 'utf8')
+        .replace(/<script type="module" src="\.\.\/dist\/assets\/popup\.js"><\/script>/, '<script type="module" src="assets/popup.js"></script>');
+
+      fs.mkdirSync(path.dirname(popupTarget), { recursive: true });
+      fs.writeFileSync(popupTarget, html, 'utf8');
+    }
+  };
+}
 
 export default defineConfig({
   plugins: [
@@ -22,7 +43,8 @@ export default defineConfig({
         }
         return ctx.modules;
       }
-    }
+    },
+    copyPopupHtmlPlugin()
   ],
   build: {
     target: 'es2022',
