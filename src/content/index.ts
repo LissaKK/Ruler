@@ -4,11 +4,15 @@ import { ProtractorTool } from './tools/protractor';
 import { EyedropperTool } from './tools/eyedropper';
 import { DistanceTool } from './tools/distance';
 import { GridTool } from './tools/grid';
+import { ElementInspectorTool } from './tools/inspector';
 
 const toolManager = new ToolManager();
 let canvas: HTMLCanvasElement | null = null;
 let canvasContext: CanvasRenderingContext2D | null = null;
 let rafHandle = 0;
+let inspectorRafHandle = 0;
+let inspectorLatestX = 0;
+let inspectorLatestY = 0;
 
 const rulerTool = (() => {
   return new RulerTool(undefined as unknown as HTMLCanvasElement);
@@ -18,6 +22,7 @@ const protractorTool = new ProtractorTool();
 const eyedropperTool = new EyedropperTool();
 const distanceTool = new DistanceTool();
 const gridTool = new GridTool();
+const inspectorTool = new ElementInspectorTool();
 
 function ensureCanvas(): HTMLCanvasElement {
   const existing = document.getElementById('ruler-extension-canvas') as HTMLCanvasElement | null;
@@ -100,6 +105,10 @@ function redrawOverlay(): void {
   if (toolManager.getActiveTool() === 'grid') {
     gridTool.draw();
   }
+
+  if (toolManager.getActiveTool() === 'size') {
+    inspectorTool.draw();
+  }
 }
 
 function scheduleRedraw(): void {
@@ -110,6 +119,24 @@ function scheduleRedraw(): void {
   rafHandle = window.requestAnimationFrame(() => {
     redrawOverlay();
     rafHandle = 0;
+  });
+}
+
+function scheduleInspectorHover(x: number, y: number): void {
+  inspectorLatestX = x;
+  inspectorLatestY = y;
+
+  if (inspectorRafHandle !== 0) {
+    return;
+  }
+
+  inspectorRafHandle = window.requestAnimationFrame(() => {
+    if (toolManager.getActiveTool() === 'size' && inspectorTool.isActive()) {
+      inspectorTool.updateHover(inspectorLatestX, inspectorLatestY);
+      scheduleRedraw();
+    }
+
+    inspectorRafHandle = 0;
   });
 }
 
@@ -153,6 +180,10 @@ function init() {
         distanceTool.moveDrag(event.clientX, event.clientY);
         scheduleRedraw();
       }
+    }
+
+    if (toolManager.getActiveTool() === 'size' && inspectorTool.isActive()) {
+      scheduleInspectorHover(event.clientX, event.clientY);
     }
   });
 
@@ -262,6 +293,12 @@ function init() {
         gridTool.activate();
       } else {
         gridTool.deactivate();
+      }
+
+      if (activeTool === 'size') {
+        inspectorTool.activate();
+      } else {
+        inspectorTool.deactivate();
       }
 
       scheduleRedraw();
