@@ -2,6 +2,22 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ activeTool: 'ruler' });
 });
 
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === 'CAPTURE_VISIBLE_TAB') {
+    chrome.tabs.captureVisibleTab(undefined, { format: 'png' }, (imageDataUrl) => {
+      if (chrome.runtime.lastError) {
+        sendResponse({ ok: false, error: chrome.runtime.lastError.message });
+      } else {
+        sendResponse({ ok: true, imageDataUrl });
+      }
+    });
+
+    return true;
+  }
+
+  return false;
+});
+
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab.id) {
     return;

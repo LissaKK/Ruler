@@ -25,6 +25,19 @@
         <button class="orientation-button" data-ruler-orientation="both">Both</button>
       </div>
     </div>
+
+    <div class="grid-section">
+      <div class="grid-title">Grid Configuration</div>
+      <label class="grid-field">
+        <span>Grid size (px)</span>
+        <input type="number" id="grid-size-input" value="8" min="2" step="1" />
+      </label>
+      <label class="grid-field checkbox-field">
+        <input type="checkbox" id="grid-center-guides" />
+        <span>Viewport center guides</span>
+      </label>
+      <button class="grid-apply" id="grid-apply-button">Apply Grid</button>
+    </div>
   </div>
   <script type="module" src="../dist/assets/popup.js"></script>
 </body>

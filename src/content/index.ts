@@ -1,6 +1,9 @@
 import { ToolManager, ToolName } from '../shared/ToolManager';
 import { RulerTool, RulerOrientation } from './tools/ruler';
 import { ProtractorTool } from './tools/protractor';
+import { EyedropperTool } from './tools/eyedropper';
+import { DistanceTool } from './tools/distance';
+import { GridTool } from './tools/grid';
 
 const toolManager = new ToolManager();
 let canvas: HTMLCanvasElement | null = null;
@@ -12,6 +15,9 @@ const rulerTool = (() => {
 })();
 
 const protractorTool = new ProtractorTool();
+const eyedropperTool = new EyedropperTool();
+const distanceTool = new DistanceTool();
+const gridTool = new GridTool();
 
 function ensureCanvas(): HTMLCanvasElement {
   const existing = document.getElementById('ruler-extension-canvas') as HTMLCanvasElement | null;
@@ -86,6 +92,14 @@ function redrawOverlay(): void {
   if (toolManager.getActiveTool() === 'protractor') {
     protractorTool.draw();
   }
+
+  if (toolManager.getActiveTool() === 'distance') {
+    distanceTool.draw();
+  }
+
+  if (toolManager.getActiveTool() === 'grid') {
+    gridTool.draw();
+  }
 }
 
 function scheduleRedraw(): void {
@@ -128,9 +142,66 @@ function init() {
         scheduleRedraw();
       }
     }
+
+    if (toolManager.getActiveTool() === 'distance' && distanceTool.isActive()) {
+      if (distanceTool.getMode() === 'drawing') {
+        distanceTool.updateDraft(event.clientX, event.clientY);
+        scheduleRedraw();
+      }
+
+      if (distanceTool.isDragging()) {
+        distanceTool.moveDrag(event.clientX, event.clientY);
+        scheduleRedraw();
+      }
+    }
   });
 
-  window.addEventListener('click', (event: MouseEvent) => {
+  window.addEventListener('mousedown', (event: MouseEvent) => {
+    if (toolManager.getActiveTool() !== 'distance') {
+      return;
+    }
+
+    if (distanceTool.isActive() && distanceTool.getMode() === 'committed') {
+      if (distanceTool.startDrag(event.clientX, event.clientY)) {
+        event.preventDefault();
+      }
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (toolManager.getActiveTool() !== 'distance') {
+      return;
+    }
+
+    if (distanceTool.isActive()) {
+      distanceTool.endDrag();
+    }
+  });
+
+  window.addEventListener('click', async (event: MouseEvent) => {
+    if (toolManager.getActiveTool() === 'eyedropper') {
+      if (eyedropperTool.isActive()) {
+        await eyedropperTool.sampleAtViewportPosition(event.clientX, event.clientY);
+      }
+      return;
+    }
+
+    if (toolManager.getActiveTool() === 'distance') {
+      if (distanceTool.isActive()) {
+        if (distanceTool.getMode() === 'idle') {
+          distanceTool.begin(event.clientX, event.clientY);
+        } else if (distanceTool.getMode() === 'drawing') {
+          distanceTool.begin(event.clientX, event.clientY);
+        } else if (distanceTool.getMode() === 'committed') {
+          distanceTool.reset();
+          distanceTool.begin(event.clientX, event.clientY);
+        }
+
+        scheduleRedraw();
+      }
+      return;
+    }
+
     if (toolManager.getActiveTool() !== 'protractor') {
       return;
     }
@@ -175,8 +246,35 @@ function init() {
         protractorTool.deactivate();
       }
 
+      if (activeTool === 'eyedropper') {
+        eyedropperTool.activate();
+      } else {
+        eyedropperTool.deactivate();
+      }
+
+      if (activeTool === 'distance') {
+        distanceTool.activate();
+      } else {
+        distanceTool.deactivate();
+      }
+
+      if (activeTool === 'grid') {
+        gridTool.activate();
+      } else {
+        gridTool.deactivate();
+      }
+
       scheduleRedraw();
       sendResponse({ ok: true, activeTool, canvasEnabled: isActive });
+    }
+
+    if (message?.type === 'GRID_CONFIG') {
+      const gridSize = Number(message.gridSize ?? 8);
+      const showGuides = Boolean(message.showCenterGuides ?? false);
+      gridTool.setGridSize(gridSize);
+      gridTool.setCenterGuides(showGuides);
+      scheduleRedraw();
+      sendResponse({ ok: true, gridSize: gridTool.getGridSize(), showCenterGuides: gridTool.isCenterGuidesVisible() });
     }
 
     if (message?.type === 'RULER_ORIENTATION') {
