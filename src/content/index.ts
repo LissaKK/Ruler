@@ -152,6 +152,9 @@ function init() {
   rulerTool.setCanvas(canvas);
   rulerTool.setOrientation('both');
   protractorTool.setCanvas(canvas);
+  distanceTool.setCanvas(canvas);
+  gridTool.setCanvas(canvas);
+  inspectorTool.setCanvas(canvas);
 
   window.addEventListener('resize', () => {
     resizeCanvas();

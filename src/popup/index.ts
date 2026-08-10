@@ -4,6 +4,15 @@ const gridSizeInput = document.querySelector<HTMLInputElement>('#grid-size-input
 const gridGuidesToggle = document.querySelector<HTMLInputElement>('#grid-center-guides');
 const gridApplyButton = document.querySelector<HTMLButtonElement>('#grid-apply-button');
 
+const activeTool = await chrome.storage.local.get(['activeTool']);
+const selectedTool = String(activeTool?.activeTool ?? 'ruler');
+
+toolButtons.forEach((button) => {
+  if (button.getAttribute('data-tool') === selectedTool) {
+    button.classList.add('active');
+  }
+});
+
 toolButtons.forEach((button) => {
   button.addEventListener('click', async () => {
     const tool = button.getAttribute('data-tool');
@@ -12,6 +21,10 @@ toolButtons.forEach((button) => {
     }
 
     await chrome.storage.local.set({ activeTool: tool });
+
+    toolButtons.forEach((item) => {
+      item.classList.toggle('active', item === button);
+    });
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.id) {
