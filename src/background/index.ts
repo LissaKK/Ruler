@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === 'CAPTURE_VISIBLE_TAB') {
-    chrome.tabs.captureVisibleTab(undefined, { format: 'png' }, (imageDataUrl) => {
+    chrome.tabs.captureVisibleTab({ format: 'png' }, (imageDataUrl) => {
       if (chrome.runtime.lastError) {
         sendResponse({ ok: false, error: chrome.runtime.lastError.message });
       } else {

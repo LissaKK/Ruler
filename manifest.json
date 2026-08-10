@@ -19,6 +19,11 @@
     "default_title": "Ruler",
     "default_popup": "dist/popup.html"
   },
+  "icons": {
+    "16": "assets/ruler-icon.jpg",
+    "48": "assets/ruler-icon.jpg",
+    "128": "assets/ruler-icon.jpg"
+  },
   "web_accessible_resources": [{
     "resources": ["dist/assets/*"],
     "matches": ["<all_urls>"]
