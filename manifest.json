@@ -15,14 +15,21 @@
       "run_at": "document_idle"
     }
   ],
+  "icons": {
+    "16": "dist/icons/icon16.png",
+    "32": "dist/icons/icon32.png",
+    "48": "dist/icons/icon48.png",
+    "128": "dist/icons/icon128.png"
+  },
   "action": {
     "default_title": "Ruler",
-    "default_popup": "dist/popup.html"
-  },
-  "icons": {
-    "16": "assets/ruler-icon.jpg",
-    "48": "assets/ruler-icon.jpg",
-    "128": "assets/ruler-icon.jpg"
+    "default_popup": "dist/popup.html",
+    "default_icon": {
+      "16": "dist/icons/icon16.png",
+      "32": "dist/icons/icon32.png",
+      "48": "dist/icons/icon48.png",
+      "128": "dist/icons/icon128.png"
+    }
   },
   "web_accessible_resources": [{
     "resources": ["dist/assets/*"],

@@ -22,6 +22,31 @@ function copyPopupHtmlPlugin() {
   };
 }
 
+function copyIconsPlugin() {
+  return {
+    name: 'copy-icons-plugin',
+    closeBundle() {
+      const iconsSourceDir = path.resolve(__dirname, 'src', 'icons');
+      const iconsTargetDir = path.resolve(__dirname, 'dist', 'icons');
+
+      if (!fs.existsSync(iconsSourceDir)) {
+        return;
+      }
+
+      fs.mkdirSync(iconsTargetDir, { recursive: true });
+
+      for (const file of fs.readdirSync(iconsSourceDir)) {
+        if (file.startsWith('icon') && file.endsWith('.png')) {
+          fs.copyFileSync(
+            path.resolve(iconsSourceDir, file),
+            path.resolve(iconsTargetDir, file)
+          );
+        }
+      }
+    }
+  };
+}
+
 export default defineConfig({
   plugins: [
     {
@@ -44,7 +69,8 @@ export default defineConfig({
         return ctx.modules;
       }
     },
-    copyPopupHtmlPlugin()
+    copyPopupHtmlPlugin(),
+    copyIconsPlugin()
   ],
   build: {
     target: 'es2022',

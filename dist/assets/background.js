@@ -1,0 +1,2 @@
+chrome.runtime.onInstalled.addListener(()=>{chrome.storage.local.set({activeTool:"ruler"})});chrome.runtime.onMessage.addListener((e,t,r)=>e?.type==="CAPTURE_VISIBLE_TAB"?(chrome.tabs.captureVisibleTab({format:"png"},o=>{chrome.runtime.lastError?r({ok:!1,error:chrome.runtime.lastError.message}):r({ok:!0,imageDataUrl:o})}),!0):!1);chrome.action.onClicked.addListener(async e=>{if(!e.id)return;const r=(await chrome.storage.local.get(["activeTool"])).activeTool??"ruler";await chrome.tabs.sendMessage(e.id,{type:"TOOL_TOGGLE",tool:r})});
+//# sourceMappingURL=background.js.map
