@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "A Manifest V3 Chrome extension for page ruler and visual measurement workflows.",
+  "description": "Manifest V3 Chrome extension for measuring pixels, angles, colors, and layout on any webpage.",
   "scripts": {
     "build": "tsc --project tsconfig.json && vite build",
     "dev": "vite --host 0.0.0.0",
