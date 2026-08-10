@@ -8,13 +8,15 @@ export class ToolManager {
     this.canvas = canvas;
   }
 
-  public activateTool(tool: string): void {
+  public activateTool(tool: string): ToolName | null {
     const normalized = this.normalizeTool(tool);
     this.activeTool = normalized;
 
     if (this.canvas) {
       this.canvas.style.pointerEvents = normalized === null ? 'none' : 'auto';
     }
+
+    return normalized;
   }
 
   public deactivateTool(): void {
